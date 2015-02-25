@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>印影</title>
+</head>
+<body>
+  <canvas id="canvas" width=300 height=300></canvas>
+  <input type="file" id="file" name="file" multiple />
+</body>
+<script type="text/javascript" charset="utf-8">
+  window.onload = function() {
+    document.getElementById('file').addEventListener('change', handleFileSelect, false);
+    draw();
+  };
+  function draw(url) {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var img = new Image();
+    if(url === undefined) url ="kakuin.gif";
+    img.src = url;
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0, img.width, img.height,0,0,300,300);
+      alpha();
+    }
+  }
+  function alpha(){
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for(var i = 0; i < imageData.data.length; i += 4){
+      var r = parseInt(imageData.data[i]);
+      var g = parseInt(imageData.data[i+1]);
+      var b = parseInt(imageData.data[i+2]);
+      if( 40 > r - ((r+g+b) / 3)){
+        imageData.data[i+3] = 0;
+      }
+    }
+    console.log("created!");
+    ctx.putImageData(imageData, 0, 0);
+  }
+  function handleFileSelect(evt) {
+    var files = evt.target.files;
+    var reader = new FileReader();
+    reader.onload = (function(theFile) {
+      return function(e) {
+        draw(e.target.result);
+      };
+    })(files[0]);
+
+    reader.readAsDataURL(files[0]);
+  }
+</script>
+</html>
